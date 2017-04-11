@@ -1,14 +1,13 @@
 import math
 import matplotlib.pyplot as plt
 
+
 # define a function to linear fit x-y data without error bars
 def least_squares_fit(x, y):
     """Perform a least-squares fit to data (x,y)
-
     Args :
        x : x values
        y : y values
-
     Returns :
        a : intercept
        b : slope
@@ -38,17 +37,14 @@ def least_squares_fit(x, y):
 
 
 """Plot data for the Gutenberg-Richter Model.
-
 Here, we plot the curve of the number of earthquakes
 greater than magnitude M, for each M value.
-
 So, we loop over the earthquakes, and store the
 frequency of each magnitude. At the end of the loop,
 we compute the cumulative distribution such that the
 value at magnitude M will be the integral of the frequency
 distribution for >= M. This is what the Gutenberg-Richter
 Model predicts. 
-
 """
 
 
@@ -72,11 +68,12 @@ for line in lines:
         try:
             words = line.split(',')
             [latitude,longitude,depth,mag] = [float(s) for s in words[1:5] ]
+                      
             magvalues.append( mag )
             # For debugging : 
-            #print 'read : {0:s} , ({1:6.3f},{2:6.3f}), d = {3:4.1f}, m = {4:6.3f}'.format(
+           # print 'read : {0:s} , ({1:6.3f},{2:6.3f}), d = {3:4.1f}, m = {4:6.3f}'.format(
             #    words[0], latitude, longitude, depth, mag
-            #    )
+             #   )
             histogram[mag] += 1
         except KeyError : 
             histogram.setdefault(mag, 1)
@@ -91,27 +88,39 @@ print ' stored', num_events, 'events in', num_bins, 'bins'
 # y data = log_10(N) where N = number of events with magnitude >= M
 M_values = sorted(histogram.keys())
 dN_values = [histogram[M] for M in M_values]
+
 log10N_values = [ math.log10(sum(dN_values[i:]))
                   for i in range(len(M_values)) ]
 
+MAcc = [ M_values[i]
+           for i in range(119,len(M_values)) ]
+
+log10NAcc =[ log10N_values[i]
+           for i in range(119,len(M_values)) ]
+
+
 print 'log10N_values is '
-for i in xrange(len(log10N_values)) :
+for i in range(119,len(log10N_values)) :
     print str(M_values[i]) + '  ' + str(log10N_values[i])
+
+
+
+    
 # First plot our "home-grown" values with our least-squares
 # fit in place. 
 plt.subplot( 2, 1, 1)
-plt.plot( M_values, log10N_values, 'v')
+plt.plot( MAcc, log10NAcc, 'v')
 plt.xlabel( 'Magnitude (M)' )
 plt.ylabel( 'log(N)' )
 
 # Next also plot matplotlib's version of the same thing.
 plt.subplot( 2, 1, 2)
-plt.hist( magvalues, bins=90, range=[1.0,10.0], log=True, bottom=0.1,cumulative=-1)
+plt.hist( magvalues, bins=70, range=[3.0,10.0], log=True, bottom=0.1,cumulative=-1)
 plt.xlabel( 'Magnitude (M)' )
 plt.ylabel( 'N' )
 
 # perform a least square fit
-fit = least_squares_fit(M_values, log10N_values)
+fit = least_squares_fit(MAcc, log10NAcc)
 print ' least_squares fit to data:'
 print ' slope b = {0:6.3f} +- {1:6.3f}'.format( fit[1], fit[4])
 print ' intercept a = {0:6.3f} +- {1:6.3f}'.format( fit[0], fit[3])
